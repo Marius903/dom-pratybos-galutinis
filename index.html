@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="lt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanilla JavaScript and LocalStorage CRUD project</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            padding: 25px;
+            background: linear-gradient(120deg, #a8e0f5, #e8c7ee, #ff8585);
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 21px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .box {
+            background: rgba(255, 255, 255, 0.45);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input:focus {
+            border-color: #6098b5;
+        }
+
+        input:disabled {
+            background: #e5e5e5;
+            cursor: not-allowed;
+        }
+
+        button {
+            border: none;
+            padding: 10px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            background: #647f83;
+            margin: 4px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .insert-btn {
+            background: #399b67;
+        }
+
+        .edit-btn {
+            background: #4c91bd;
+        }
+
+        .delete-btn {
+            background: #d65d5d;
+        }
+
+        .search-btn {
+            background: #647f83;
+            margin-top: 12px;
+        }
+
+        .cart-btn {
+            background: #b17b43;
+        }
+
+        .remove-btn {
+            background: #d65d5d;
+        }
+
+        .message {
+            min-height: 22px;
+            margin-top: 12px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+            padding: 10px 7px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+        }
+
+        .cart-section {
+            max-width: 1200px;
+            margin: 25px auto;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.45);
+            border-radius: 12px;
+        }
+
+        .cart-section h2 {
+            color: #444;
+        }
+
+        .style-section {
+            max-width: 1200px;
+            margin: 25px auto;
+            padding: 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.45);
+            border-radius: 12px;
+        }
+
+        #myParagraph {
+            padding: 10px;
+            font-size: 18px;
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 12px;
+            }
+
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .box {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+
+            th,
+            td {
+                font-size: 11px;
+                padding: 7px 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Vanilla JavaScript and LocalStorage CRUD project</h1>
+
+    <div class="main-layout">
+
+        <!-- PRODUCT FORM -->
+
+        <section class="box">
+
+            <h2>Product Management</h2>
+
+            <form id="productForm">
+
+                <label for="productId">Product Code (ID)</label>
+                <input type="number" id="productId" placeholder="Only numbers..." min="1" step="1">
+
+                <label for="productName">Product Name</label>
+                <input type="text" id="productName" placeholder="Enter product name...">
+
+                <label for="productQuantity">Product Quantity</label>
+                <input type="number" id="productQuantity" placeholder="Enter quantity..." min="1" step="1">
+
+                <div class="buttons">
+
+                    <button type="submit" class="insert-btn">
+                        Insert new
+                    </button>
+
+                    <button type="button" id="editBtn" class="edit-btn">
+                        Edit item
+                    </button>
+
+                    <button type="button" id="deleteBtn" class="delete-btn">
+                        Delete from LS
+                    </button>
+
+                </div>
+
+            </form>
+
+            <p id="message" class="message"></p>
+
+            <div class="table-container">
+                <table id="productTableContainer" hidden>
+
+                    <thead>
+                        <tr>
+                            <th>Product Code</th>
+                            <th>Product Name</th>
+                            <th>Product Quantity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="productTable"></tbody>
+
+                </table>
+
+                <p id="emptyProducts" class="empty">
+                    No products in stock.
+                </p>
+            </div>
+
+        </section>
+
+
+        <!-- SEARCH SECTION -->
+
+        <section class="box">
+
+            <h2>Find Product by Code</h2>
+
+            <label for="searchId">Product Code</label>
+
+            <input type="number" id="searchId" placeholder="Only numbers..." min="1" step="1">
+
+            <button type="button" id="searchBtn" class="search-btn">
+                Select from LS
+            </button>
+
+            <p id="searchMessage" class="message"></p>
+
+            <div class="table-container">
+
+                <table id="searchTableContainer" hidden>
+
+                    <thead>
+                        <tr>
+                            <th>Product Code</th>
+                            <th>Product Name</th>
+                            <th>Product Quantity</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="searchTable"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
